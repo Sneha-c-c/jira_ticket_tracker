@@ -4,8 +4,9 @@ import { Layout, Typography, Space, Button, message } from "antd";
 import CurrentStatusTable from "./components/CurrentStatusTable.jsx";
 import StatusSummaryTable from "./components/StatusSummaryTable.jsx";
 import "./ticketDetail.css";
+import HeaderBar from "./components/HeaderBar.jsx";
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 const { Title, Text } = Typography;
 
 const API_BASE = process.env.REACT_APP_API_BASE || "";
@@ -89,24 +90,18 @@ export default function TicketDetail() {
 
   return (
     <Layout style={{ minHeight: "100vh", background: "var(--bg-canvas)" }} className="td-page">
-      <Header style={{ background: "#fff", borderBottom: "1px solid var(--border-subtle)", position: "sticky", top: 0, zIndex: 10 }}>
-        <Space align="center" style={{ width: "100%", justifyContent: "space-between" }}>
-          <div>
-            <Title level={4} style={{ margin: 0 }}>
-              Ticket Detail: <Text code>{key}</Text>
-            </Title>
-            {summary?.summary && (
-              <Text type="secondary">Summary: {summary.summary}</Text>
-            )}
-          </div>
+      <HeaderBar
+        title={`Ticket Detail: ${key}`}
+        subtitle={summary?.summary ? `Summary: ${summary.summary}` : ""}
+        rightContent={
           <Space>
             <Link to="/" title="Back to dashboard">Back to Dashboard</Link>
             <Button type="primary" onClick={downloadCSV} disabled={!rows?.length}>
               Download CSV
             </Button>
           </Space>
-        </Space>
-      </Header>
+        }
+      />
 
       <Content className="td-content">
         <Space direction="vertical" size={16} style={{ width: "100%" }}>

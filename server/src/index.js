@@ -511,6 +511,127 @@ app.get("/api/tickets/:ticketId/worklog.xlsx", async (req, res) => {
   }
 });
 
+
+async function fetchAllWorklogs(issueKey) {
+  const maxResults = 100;
+  let startAt = 0;
+  let all = [];
+  // Jira v3: GET /issue/{issueKey}/worklog?startAt=&maxResults=
+  while (true) {
+    const { data } = await jiraV3.get(`/issue/${issueKey}/worklog`, {
+      params: { startAt, maxResults },
+    });
+    const list = data.worklogs || data.values || [];
+    all = all.concat(list);
+    const total = data.total != null ? data.total : all.length;
+    startAt += maxResults;
+    if (all.length >= total || list.length === 0) break;
+  }
+  return all;
+}
+
+/**
+ * Helper to format seconds into "Xh Ym".
+ */
+function formatSeconds(sec) {
+  const total = Math.max(0, Math.floor(sec));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const parts = [];
+  if (hours) parts.push(`${hours}h`);
+  parts.push(`${minutes}m`);
+  return parts.join(" ");
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * GET /api/member/:accountId/timelog
+ * Query: startDate=YYYY-MM-DD, endDate=YYYY-MM-DD
+ * Returns aggregated time per issue for the selected member within the date range:
+ * { jql, totalIssues, totalsSeconds, items: [{ issueKey, summary, browseUrl, timeSpentSeconds, timeSpentFormatted }] }
+ */
+app.get("/api/member/:accountId/timelog", async (req, res) => {
+  try {
+    const { accountId } = req.params;
+    const { startDate, endDate } = req.query || {};
+
+    if (!accountId) return res.status(400).json({ error: "accountId is required" });
+    if (!startDate || !endDate) {
+      return res.status(400).json({ error: "startDate and endDate are required (YYYY-MM-DD)" });
+    }
+
+    // Build JQL to find all issues with worklogs by this author within date range
+    const jql =
+      `worklogAuthor = ${accountId} AND worklogDate >= "${startDate}" AND worklogDate <= "${endDate}"`;
+
+    // Use v3 search to get issues (keys and summaries)
+    const { data: search } = await jiraV3.post("/search", {
+      jql,
+      fields: ["summary"],
+      maxResults: 1000,
+    });
+
+    const issues = search.issues || [];
+    const start = new Date(`${startDate}T00:00:00.000Z`);
+    const end = new Date(`${endDate}T23:59:59.999Z`);
+
+    // For each issue, fetch worklogs and aggregate per this user + within range
+    const results = [];
+    let totalsSeconds = 0;
+
+    // Limit concurrency naive: sequential to avoid rate limits in small teams
+    for (const issue of issues) {
+      const key = issue.key;
+      const summary = issue.fields?.summary || "";
+      const worklogs = await fetchAllWorklogs(key);
+
+      let seconds = 0;
+      for (const wl of worklogs) {
+        const wlAccountId = wl.author?.accountId || wl.updateAuthor?.accountId || wl.author?.key;
+        // Parse 'started' like 2021-01-01T10:00:00.000+0000
+        if (!wl.started || wlAccountId !== accountId) continue;
+        const startedISO = wl.started.replace(/(\+|\-)(\d{2})(\d{2})$/, "$1$2:$3"); // normalize timezone
+        const ts = new Date(startedISO);
+        if (isNaN(ts.getTime())) continue;
+        if (ts >= start && ts <= end) {
+          const s = Number(wl.timeSpentSeconds) || 0;
+          seconds += s;
+        }
+      }
+
+      if (seconds > 0) {
+        totalsSeconds += seconds;
+        results.push({
+          issueKey: key,
+          summary,
+          browseUrl: `${BASE}/browse/${key}`,
+          timeSpentSeconds: seconds,
+          timeSpentFormatted: formatSeconds(seconds),
+        });
+      }
+    }
+
+    // Sort by time desc
+    results.sort((a, b) => b.timeSpentSeconds - a.timeSpentSeconds);
+
+    res.json({
+      jql,
+      totalIssues: issues.length,
+      totalsSeconds,
+      totalsFormatted: formatSeconds(totalsSeconds),
+      items: results,
+    });
+  } catch (err) {
+    console.error("Member timelog error:", err.response?.data || err.message);
+    res.status(err.response?.status || 500).json({
+      error: "Failed to compute member timelog",
+      details: err.response?.data || err.message,
+    });
+  }
+});
+
+
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`API listening on http://127.0.0.1:${PORT}`);
 });

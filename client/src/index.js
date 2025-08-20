@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from "./App.jsx";
 import TicketDetail from "./TicketDetail.jsx";
+import MemberTimelog from "./MemberTimelog.jsx";
 import "antd/dist/reset.css";
 import "./index.css";
 
@@ -11,6 +12,7 @@ root.render(
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<App />} />
+      <Route path="/tab" element={<MemberTimelog />} />
       <Route path="/ticket/:key" element={<TicketDetail />} />
       <Route path="/tickets/:key" element={<TicketDetail />} />
     </Routes>

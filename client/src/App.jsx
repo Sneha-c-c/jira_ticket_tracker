@@ -4,8 +4,10 @@ import {
   DatePicker, Select, Button, List, Tag, message, Avatar, Table
 } from "antd";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
+import HeaderBar from "./components/HeaderBar.jsx";
 
-const { Header, Content, Sider } = Layout;
+const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
 
 // If REACT_APP_API_BASE is set, use it; else rely on CRA proxy and same-origin.
@@ -83,6 +85,7 @@ export default function App() {
   }
 
   useEffect(() => { loadMembers(); }, []);
+  const navigate = useNavigate();
 
   // Treat Atlassian/Gravatar default "initials" images as default
   const isDefaultInitialsAvatar = (url) => {
@@ -213,11 +216,7 @@ export default function App() {
 
       {/* Main */}
       <Layout>
-        <Header style={{ background: "#fff", borderBottom: "1px solid #eee", position: "sticky", top: 0, zIndex: 10 }}>
-          <Title level={4} style={{ margin: 0 }}>
-            Team / <Text type="secondary">metaz</Text>
-          </Title>
-        </Header>
+        <HeaderBar title="Team Ticket Viewer" subtitle="metaz" />
 
         <Content style={{ padding: 16 }}>
           <Space align="start" size={16} wrap>
@@ -244,7 +243,11 @@ export default function App() {
                     const bg = stringToColor(m.displayName || m.accountId);
 
                     return (
-                      <List.Item>
+                      <List.Item
+                        style={{ cursor: "pointer", borderRadius: 8 }}
+                        onClick={() => navigate(`/tab?member=${encodeURIComponent(m.accountId)}&name=${encodeURIComponent(m.displayName || "")}`)}
+                        title={`View timelog for ${m.displayName || m.accountId}`}
+                      >
                         <List.Item.Meta
                           avatar={
                             showImage ? (
@@ -255,7 +258,7 @@ export default function App() {
                               </Avatar>
                             )
                           }
-                          title={m.displayName || m.accountId}
+                          title={<span style={{ color: "var(--text)" }}>{m.displayName || m.accountId}</span>}
                         />
                       </List.Item>
                     );
