@@ -121,7 +121,16 @@ export default function App() {
       dataIndex: "key",
       key: "key",
       width: 160,
-      render: (key) => <Text strong>{key}</Text>
+      render: (key) => (
+        <a
+          href={`/tickets/${key}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open detailed view in a new tab"
+        >
+          <Text strong>{key}</Text>
+        </a>
+      )
     },
     {
       title: "Ticket",
