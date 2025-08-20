@@ -3,12 +3,15 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const axios = require("axios");
 const ExcelJS = require("exceljs");
+const chronoboard = require('./chronoboard');
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/api/chronoboard', chronoboard);
+
 
 const {
   PORT = 4000,
