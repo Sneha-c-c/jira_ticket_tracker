@@ -147,7 +147,12 @@ export default function App() {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {/* Sidebar */}
-      <Sider width={260} style={{ background: "#fff", borderRight: "1px solid #eee", padding: 16 }}>
+      <Sider
+        width={280}
+        breakpoint="lg"
+        collapsedWidth={0}
+        style={{ background: "#fff", borderRight: "1px solid #eee", padding: 16 }}
+      >
         <Space direction="vertical" size={16} style={{ width: "100%" }}>
           <Title level={4} style={{ margin: 0 }}>Team Ticket Viewer</Title>
 
@@ -158,7 +163,7 @@ export default function App() {
             </div>
           </Card>
 
-          <Button onClick={resetUI} style={{background:"#7d98f1ff"}}>Reset</Button>
+          <Button onClick={resetUI}>Reset</Button>
 
           {/* Filters block in sidebar */}
           <Card size="small" title="Filters">
@@ -208,7 +213,7 @@ export default function App() {
 
       {/* Main */}
       <Layout>
-        <Header style={{ background: "#fff", borderBottom: "1px solid #eee" }}>
+        <Header style={{ background: "#fff", borderBottom: "1px solid #eee", position: "sticky", top: 0, zIndex: 10 }}>
           <Title level={4} style={{ margin: 0 }}>
             Team / <Text type="secondary">metaz</Text>
           </Title>

@@ -1,6 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Layout, Typography, Card, Space, Table, Button, message } from "antd";
+import { Layout, Typography, Space, Button, message } from "antd";
+import CurrentStatusTable from "./components/CurrentStatusTable.jsx";
+import StatusSummaryTable from "./components/StatusSummaryTable.jsx";
+import "./ticketDetail.css";
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -9,8 +12,8 @@ const API_BASE = process.env.REACT_APP_API_BASE || "";
 
 // PUBLIC_INTERFACE
 export default function TicketDetail() {
-  /** This page shows aggregated time per status for a single JIRA ticket,
-   * including the dominant assignee per status, and allows CSV download.
+  /** This page shows current status and aggregated time per status for a single JIRA ticket,
+   * using semantic, accessible tables styled per the app's design system.
    */
   const { key } = useParams();
   const [loading, setLoading] = useState(false);
@@ -37,13 +40,6 @@ export default function TicketDetail() {
     }
     load();
   }, [key]);
-
-  const columns = useMemo(() => [
-    { title: "Ticket No", dataIndex: "ticket", key: "ticket", width: 160 },
-    { title: "Status of Application", dataIndex: "status", key: "status" },
-    { title: "Assignee", dataIndex: "assignee", key: "assignee", width: 220 },
-    { title: "Time Spent", dataIndex: "timeHuman", key: "timeHuman", width: 140 }
-  ], []);
 
   function toCSV() {
     const header = ["Ticket No", "Status of Application", "Assignee", "Time Spent"];
@@ -86,9 +82,14 @@ export default function TicketDetail() {
     }
   }
 
+  const jiraBrowseUrl = useMemo(() => {
+    // Prefer server BASE link if provided in data later; for now construct a relative browse path.
+    return `/browse/${key}`;
+  }, [key]);
+
   return (
-    <Layout style={{ minHeight: "100vh", background: "#fff" }}>
-      <Header style={{ background: "#fff", borderBottom: "1px solid #eee" }}>
+    <Layout style={{ minHeight: "100vh", background: "var(--bg-canvas)" }} className="td-page">
+      <Header style={{ background: "#fff", borderBottom: "1px solid var(--border-subtle)", position: "sticky", top: 0, zIndex: 10 }}>
         <Space align="center" style={{ width: "100%", justifyContent: "space-between" }}>
           <div>
             <Title level={4} style={{ margin: 0 }}>
@@ -107,39 +108,24 @@ export default function TicketDetail() {
         </Space>
       </Header>
 
-      <Content style={{ padding: 16 }}>
+      <Content className="td-content">
         <Space direction="vertical" size={16} style={{ width: "100%" }}>
-          <Card>
-            <Space direction="vertical" size={4}>
-              <Text>
-                Current Status: <Text strong>{currentStatus || "Unknown"}</Text>
-              </Text>
-              <Text type="secondary">
-                View in JIRA:{" "}
-                <a
-                  href={`${window.location.origin}/browse/${key}`}
-                  onClick={(e) => {
-                    // If the app domain isn't the JIRA domain, try the configured base URL instead (server-side uses env).
-                    e.preventDefault();
-                    window.open(`/browse/${key}`, "_blank", "noopener,noreferrer");
-                  }}
-                >
-                  /browse/{key}
-                </a>
-              </Text>
-            </Space>
-          </Card>
+          <CurrentStatusTable
+            ticketKey={summary?.key || key}
+            currentStatus={currentStatus}
+            issueSummary={summary?.summary}
+            browseUrl={jiraBrowseUrl}
+          />
 
-          <Card title="Time Spent per Status (dominant assignee)">
-            <Table
-              rowKey={(r) => r.status}
-              loading={loading}
-              columns={columns}
-              dataSource={rows}
-              size="middle"
-              pagination={{ pageSize: 10, showSizeChanger: false }}
-            />
-          </Card>
+          <StatusSummaryTable
+            rows={rows}
+            isLoading={loading}
+            actions={
+              <Button onClick={downloadCSV} disabled={!rows?.length}>
+                Export CSV
+              </Button>
+            }
+          />
         </Space>
       </Content>
     </Layout>
