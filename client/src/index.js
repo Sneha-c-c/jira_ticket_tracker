@@ -7,6 +7,7 @@ import MemberTimelog from "./MemberTimelog.jsx";
 import ChronoBoardDashboard from "./ChronoBoardDashboard.jsx";
 import "antd/dist/reset.css";
 import "./index.css";
+import "./filters.css";
 
 const root = createRoot(document.getElementById("root"));
 root.render(

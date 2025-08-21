@@ -1,0 +1,184 @@
+.filter-container {
+  width: 95%;
+  max-width: 1300px;
+  margin: 32px auto 0 auto;
+  background: #fff;
+  border: 1px solid #E6E8EC;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px 0 rgba(34, 48, 73, 0.04);
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+.filter-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  gap: 5px;
+  position: relative;
+  flex: none;
+}
+
+.filter-block.short {
+  min-width: 90px;
+  max-width: 140px;
+}
+
+.filter-label {
+  font-size: 13px;
+  font-weight: 400;
+  color: #B0B7C3;
+  margin-bottom: 2px;
+}
+
+.filter-select {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #E6E8EC;
+  color: #212332;
+  background: #fff;
+  width: 180px;
+  appearance: none;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.filter-select:focus {
+  border-color: #007aff;
+  box-shadow: 0 0 0 2px #007aff22;
+}
+
+.filter-owner {
+  width: 140px;
+  color: #212332;
+  background: #f6f8fa;
+  font-weight: 500;
+}
+
+.filter-tickets,
+.filter-projects,
+.filter-groups,
+.filter-users,
+.filter-status {
+  min-width: 170px;
+  max-width: 220px;
+  width: 200px;
+}
+
+.filter-select[multiple] {
+  height: auto;
+  min-height: 34px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.filter-search {
+  margin-top: 3px;
+  padding: 4px 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #E6E8EC;
+  width: 93%;
+  outline: none;
+  color: #212332;
+  background: #fafbfc;
+  transition: border-color 0.19s;
+}
+
+.filter-search:focus {
+  border-color: #007aff;
+}
+
+.search-btn-outer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  margin-left: 12px;
+  min-width: 96px;
+}
+
+.filter-btn {
+  background: #007aff;
+  color: #fff;
+  font-weight: 500;
+  font-size: 15px;
+  border-radius: 8px;
+  min-width: 86px;
+  height: 36px;
+  border: none;
+  padding: 0 18px;
+  cursor: pointer;
+  transition: filter 0.13s, background 0.14s;
+  box-shadow: 0 1px 3px rgba(16,28,54,0.07);
+  margin-top: auto;
+}
+
+.filter-btn:focus {
+  outline: 2px solid #a1cdfc;
+}
+
+.filter-btn:hover:not([disabled]) {
+  background: #005fcc;
+}
+
+.filter-btn:active {
+  background: #0054ad;
+  filter: brightness(0.97);
+}
+
+.filter-btn[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsive tweaks */
+@media (max-width: 1000px) {
+  .filter-container {
+    flex-wrap: wrap;
+    gap: 13px 10px;
+    padding: 14px 7px;
+  }
+  .filter-select,
+  .filter-tickets,
+  .filter-users,
+  .filter-projects,
+  .filter-groups,
+  .filter-status {
+    min-width: 120px;
+    width: 120px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 700px) {
+  .filter-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 5px;
+    min-width: 0;
+    width: 99%;
+    max-width: 100vw;
+  }
+  .filter-block {
+    width: 100%;
+    min-width: 0;
+  }
+  .search-btn-outer {
+    margin: 0;
+    align-items: stretch;
+  }
+}
+
+/* Hide vertical resize handle for search fields on Safari/Chrome */
+.filter-search::-webkit-resizer {
+  display: none;
+}

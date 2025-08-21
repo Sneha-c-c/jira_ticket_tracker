@@ -10,6 +10,11 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+/**
+ * PUBLIC_INTERFACE
+ * Mount ChronoBoard filter/search API (projects, groups, users, statuses, issue types, environments, tickets).
+ * Routes under: /api/chronoboard/...
+ */
 app.use('/api/chronoboard', chronoboard);
 
 

@@ -10,6 +10,7 @@ import "./ticketDetail.css";
 import MemberTimelog from "./MemberTimelog.jsx";
 import ChronoBoardDashboard from "./ChronoBoardDashboard.jsx";
 
+// Main dashboard route is now ChronoBoardDashboard (with updated filter logic)
 createRoot(document.getElementById("root")).render(
   <ConfigProvider
     theme={{
@@ -54,7 +55,7 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<ChronoBoardDashboard />} />
-        <Route path="chronoboard" element={<App />} />
+        {/* App.jsx left for legacy route */}
         <Route path="/tab" element={<MemberTimelog />} />
         <Route path="/ticket/:key" element={<TicketDetail />} />
         <Route path="/tickets/:key" element={<TicketDetail />} />

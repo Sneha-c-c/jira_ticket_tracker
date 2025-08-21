@@ -1,0 +1,90 @@
+:root {
+  --bg-surface: #F9FAFB;
+  --bg-input: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #6B7280;
+  --border-subtle: #E5E7EB;
+  --border-strong: #CBD5E1;
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+  --focus-ring: #93C5FD;
+  --shadow-color: rgba(2, 6, 23, 0.08);
+}
+
+/* Filters Container (JIRA-like) */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px 0 var(--shadow-color);
+  margin-bottom: 16px;
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+}
+
+.filters-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Field group */
+.field {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+.field label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+/* Normalize control height to ~40px via AntD defaults */
+.ant-select-selector,
+.ant-picker {
+  min-height: 40px;
+}
+
+/* Prevent option truncation: increase dropdown max height and allow long labels */
+.ant-select-dropdown {
+  max-height: 320px !important;
+}
+.ant-select-item-option-content {
+  white-space: normal !important;
+  line-height: 1.3;
+}
+
+/* Helper text */
+.field-help {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.field-help.error {
+  color: #B91C1C;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filters {
+    padding: 12px;
+    gap: 8px 8px;
+  }
+  .field {
+    min-width: 160px;
+  }
+}
