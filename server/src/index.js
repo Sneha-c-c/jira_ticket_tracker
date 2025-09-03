@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const axios = require("axios");
 const ExcelJS = require("exceljs");
 const chronoboard = require('./chronoboard');
+const worklogRouter = require('./worklog');
 
 dotenv.config();
 
@@ -16,6 +17,12 @@ app.use(express.json());
  * Routes under: /api/chronoboard/...
  */
 app.use('/api/chronoboard', chronoboard);
+/**
+ * PUBLIC_INTERFACE
+ * Mount Worklog standalone API for aggregated worklog data and XLSX export.
+ * Routes under: /api/worklog/...
+ */
+app.use('/api/worklog', worklogRouter);
 
 
 const {

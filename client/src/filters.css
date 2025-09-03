@@ -88,3 +88,137 @@
     min-width: 160px;
   }
 }
+
+
+/* Utility toolbar above users list */
+.user-tools {
+  margin-bottom: 4px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: static;
+  width: 100%;
+}
+.user-tools .btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.user-tools .btn:hover {
+  background: var(--accent-hover);
+}
+.user-tools .input {
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+  min-width: 120px;
+}
+.user-tools .input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+/* Bespoke Users Dropdown */
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  /* Ensure parents with overflow hidden don't clip trigger; panel uses fixed variant to escape */
+  overflow: visible;
+}
+.custom-dropdown-trigger {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-input);
+  padding: 8px 12px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+}
+.custom-dropdown-trigger:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.custom-dropdown-trigger .placeholder {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.custom-dropdown-trigger .arrow {
+  transition: transform 0.15s ease-in-out;
+}
+.custom-dropdown-trigger .arrow.open {
+  transform: rotate(180deg);
+}
+
+.custom-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 2147483646; /* very high to avoid being cut off by other positioned ancestors */
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.12);
+  /* Avoid parent overflow clipping if not using fixed; allow overscroll */
+  will-change: transform, top, left, width, max-height;
+}
+
+/* Fixed-position variant to escape parent overflow and fit viewport */
+.custom-dropdown-panel.fixed {
+  position: fixed;
+  /* top/left/width set inline from JS for precise anchoring */
+  right: auto;
+  max-height: min(60vh, 340px); /* constrain to viewport height */
+  overflow: hidden; /* toolbar fixed, list scrolls */
+  display: flex;
+  flex-direction: column;
+}
+
+/* When space below is insufficient and we open upwards */
+.custom-dropdown-panel.open-up {
+  /* no special styles beyond class flag; placement handled via inline style */
+}
+
+/* Ensure internal list scrolls while toolbar stays visible */
+.custom-dropdown-panel .custom-dropdown-list {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.custom-dropdown-list {
+  max-height: 260px;
+  overflow: auto;
+}
+
+.custom-option:hover {
+  background: #f6f8fb;
+  border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filters {
+    padding: 12px;
+    gap: 8px 8px;
+  }
+  .field {
+    min-width: 160px;
+  }
+}
+
+

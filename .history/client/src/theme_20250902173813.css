@@ -129,10 +129,10 @@ body a:hover {
 /* existing dark header rules from earlier remain the same */
 
 /* Left brand stack */
-.metaz-logo { width:45px; height:40px; border-radius:6px; object-fit:contain; }
+.metaz-logo { width:40px; height:40px; border-radius:6px; object-fit:contain; }
 
-.metaz-brand-wrap { display:flex; flex-direction:column; line-height:1.1; margin: 10px; }
-.metaz-brand-title { color:#fff; font-weight:700; font-size:16px;  }
+.metaz-brand-wrap { display:flex; flex-direction:column; line-height:1.1; }
+.metaz-brand-title { color:#fff; font-weight:700; font-size:16px; margin-right: 10px; }
 .metaz-brand-subtitle { color:rgba(255,255,255,0.7); font-size:12px; margin-top:2px; }
 
 /* Center (unchanged) */

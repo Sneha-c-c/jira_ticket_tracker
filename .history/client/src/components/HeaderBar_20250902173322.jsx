@@ -11,7 +11,7 @@ export default function HeaderBar({
   return (
     <Layout.Header className="metaz-header">
       <div className="metaz-header__inner">
-        {/* LEFT: logo + brand */}
+        {/* LEFT — logo + brand (now two lines: MetaZ Digital + ChronoBoard) */}
         <div className="metaz-header__left">
           <img src={logo} alt="MetaZ Logo" className="metaz-logo" />
           <div className="metaz-brand-wrap">
@@ -20,13 +20,13 @@ export default function HeaderBar({
           </div>
         </div>
 
-        {/* CENTER: title/subtitle */}
+        {/* CENTER — title/subtitle (kept centered) */}
         <div className="metaz-header__center">
           <div className="metaz-title">{title}</div>
           <div className="metaz-subtitle">{subtitle}</div>
         </div>
 
-        {/* RIGHT: Back button */}
+        {/* RIGHT — Back */}
         <div className="metaz-header__right">
           <Button
             className="metaz-back-btn"
@@ -38,7 +38,6 @@ export default function HeaderBar({
           </Button>
         </div>
       </div>
-
     </Layout.Header>
   );
 }

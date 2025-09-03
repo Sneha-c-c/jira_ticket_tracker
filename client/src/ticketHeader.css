@@ -1,0 +1,137 @@
+/* =========================================================
+   Ticket Details — Header & Page Styles (matches Dashboard)
+   ========================================================= */
+
+:root{
+  /* palette aligned to dashboard */
+  --bg-canvas:#F6F8FB;
+  --panel-bg:#FFFFFF;
+  --text-strong:#0B1B2B;
+  --text-subtle:#6B7A89;
+  --divider-weak:#E6E8EB;
+  --hover-bg:#F5F7FA;
+  --accent:#2F6FED;       /* same blue as Search */
+  --brand-dark:#0F172A;   /* dark header/nav tone */
+
+  --radius-lg:16px;
+  --shadow-lg:0 10px 34px rgba(17,38,60,.08);
+}
+
+/* Page canvas */
+html, body, .ant-layout{
+  background:var(--bg-canvas) !important;
+}
+
+/* =========================
+   DARK HEADER (dashboard tone)
+   ========================= */
+    /* ===== Header (absolute 3-zone layout) ===== */
+.ticket-header{
+  width:100%;
+  background:var(--brand-dark);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  color:#fff;
+}
+.ticket-header .inner{
+  position:relative;           /* anchor abs children */
+  /* max-width:1280px; */
+  margin:0 auto;
+  padding:0 16px;              /* page gutters */
+  height:72px;                 /* fixed bar height */
+}
+
+/* ---- LEFT: brand pinned to left gutter ---- */
+.header-brand{
+  position:absolute;
+  left:20px;                   /* truly at the beginning */
+  top:50%;
+  transform:translateY(-50%);
+  display:flex; align-items:center; gap:12px;
+}
+.brand-badge{ width:52px; height:52px; border-radius:12px; background:rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; }
+.brand-img{ width:34px; height:34px; object-fit:contain; display:block; }
+.brand-block{ display:flex; flex-direction:column; line-height:1.2; }
+.brand-text{ font-size:18px; font-weight:600; color:#fff; }
+.brand-subtext{ font-size:13px; color:#cbd5e1; }
+
+/* ---- CENTER: perfectly centered title/meta ---- */
+.header-center{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  min-width:0;
+  max-width:min(920px, 70vw);
+  pointer-events:none;          /* so actions stay clickable if overlap */
+}
+.header-title .id{
+  display:inline-block; padding:2px 8px; border-radius:6px;
+  background:rgba(255,255,255,.12); color:#fff; font-size:12px; font-weight:700;
+  margin-right:8px;
+}
+.header-title .summary{
+  display:inline; margin:0; color:#fff; font-weight:700; font-size:18px; line-height:1.2;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.header-meta{
+  margin-top:4px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;
+  pointer-events:auto;          /* keep links clickable */
+}
+.meta-badge{
+  padding:2px 10px; border-radius:999px; background:rgba(255,255,255,.12);
+  color:#E2E8F0; font-size:12px; font-weight:600; border:1px solid rgba(255,255,255,.18);
+}
+
+/* ---- RIGHT: actions pinned to right gutter ---- */
+.header-actions{
+  position:absolute;
+  right:16px;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex; align-items:center; gap:10px;
+}
+.header-actions .btn-primary,
+.header-actions .btn-ghost{
+  appearance:none; -webkit-appearance:none;
+  display:inline-flex; align-items:center; justify-content:center;
+  height:34px; padding:0 14px; border-radius:10px; font-weight:600;
+  text-decoration:none; white-space:nowrap; cursor:pointer;
+}
+.header-actions .btn-primary{ background:var(--accent); color:#fff; border:1px solid var(--accent); }
+.header-actions .btn-primary:hover{ filter:brightness(.97); }
+.header-actions .btn-ghost{ background:transparent; color:#E2E8F0; border:1px solid rgba(255,255,255,.25); }
+.header-actions .btn-ghost:hover{ background:rgba(255,255,255,.08); }
+
+/* Responsive */
+@media (max-width:1024px){
+  .header-center{ max-width:82vw; }
+  .header-title .summary{ white-space:normal; }
+}
+@media (max-width:520px){
+  .header-actions .btn-ghost{ display:none; } /* keep primary visible */
+}
+
+
+/* =========================
+   Cards (match dashboard)
+   ========================= */
+.details-shell{
+  width:100%;
+  max-width:1100px;
+  margin:0 auto;
+}
+.details-card{
+  border-radius:var(--radius-lg) !important;
+  box-shadow:var(--shadow-lg);
+  overflow:hidden;
+}
+
+/* Optional diagnostics block */
+.diag{
+  margin-top:12px;
+  background:#0f172a0a;
+  padding:12px;
+  border-radius:8px;
+}
+

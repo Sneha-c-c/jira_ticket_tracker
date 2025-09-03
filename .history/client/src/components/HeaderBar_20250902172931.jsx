@@ -1,3 +1,4 @@
+// components/HeaderBar.jsx
 import React from "react";
 import { Layout, Button } from "antd";
 import logo from "../assets/metazz.png";
@@ -13,32 +14,29 @@ export default function HeaderBar({
       <div className="metaz-header__inner">
         {/* LEFT: logo + brand */}
         <div className="metaz-header__left">
-          <img src={logo} alt="MetaZ Logo" className="metaz-logo" />
-          <div className="metaz-brand-wrap">
-            <div className="metaz-brand-title">MetaZ Digital</div>
-            <div className="metaz-brand-subtitle">ChronoBoard</div>
-          </div>
+          <img
+            src={logo}
+            alt="MetaZ Logo"
+            className="metaz-logo"
+          />
+          <span className="metaz-brand">MetaZ Digital</span>
         </div>
 
-        {/* CENTER: title/subtitle */}
+        {/* CENTER: title + subtitle (absolute centered) */}
         <div className="metaz-header__center">
           <div className="metaz-title">{title}</div>
           <div className="metaz-subtitle">{subtitle}</div>
         </div>
 
-        {/* RIGHT: Back button */}
+        {/* RIGHT: Back */}
         <div className="metaz-header__right">
-          <Button
-            className="metaz-back-btn"
-            onClick={() =>
-              (typeof onBack === "function" ? onBack() : window.location.assign(backHref))
-            }
+          <Button className="metaz-back-btn"
+            onClick={() => (typeof onBack === "function" ? onBack() : window.location.assign(backHref))}
           >
             Back to Dashboard
           </Button>
         </div>
       </div>
-
     </Layout.Header>
   );
 }

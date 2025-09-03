@@ -115,34 +115,43 @@ body a:hover {
   align-items: center;
 }
 
-/* LEFT side stays left */
 .metaz-header__left {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* RIGHT side pushes fully to right */
-.metaz-header__right {
-  margin-left: auto; /* <-- pushes button all the way to the right */
+.metaz-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  object-fit: cover;
 }
-/* existing dark header rules from earlier remain the same */
 
-/* Left brand stack */
-.metaz-logo { width:45px; height:40px; border-radius:6px; object-fit:contain; }
+.metaz-brand { color: #fff; font-weight: 600; }
 
-.metaz-brand-wrap { display:flex; flex-direction:column; line-height:1.1; margin: 10px; }
-.metaz-brand-title { color:#fff; font-weight:700; font-size:16px;  }
-.metaz-brand-subtitle { color:rgba(255,255,255,0.7); font-size:12px; margin-top:2px; }
-
-/* Center (unchanged) */
+/* Absolute centered title/subtitle */
 .metaz-header__center {
-  position:absolute; left:50%; transform:translateX(-50%);
-  display:flex; flex-direction:column; align-items:center; line-height:1.1; pointer-events:none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  pointer-events: none; /* keep button clickable */
 }
-.metaz-title { color:#fff; font-size:16px; font-weight:700; }
-.metaz-subtitle { color:rgba(255,255,255,0.75); font-size:12px; }
+.metaz-title { color: #fff; font-size: 16px; font-weight: 700; }
+.metaz-subtitle { color: rgba(255,255,255,0.75); font-size: 12px; }
 
-/* Back button (white outline on dark) */
-.metaz-back-btn { background:transparent !important; color:#fff !important; border-color:rgba(255,255,255,0.45) !important; }
-.metaz-back-btn:hover, .metaz-back-btn:focus { border-color:#fff !important; color:#fff !important; }
+/* Right button – light-on-dark */
+.metaz-header__right { margin-left: auto; }
+.metaz-back-btn {
+  background: transparent !important;
+  color: #fff !important;
+  border-color: rgba(255,255,255,0.45) !important;
+}
+.metaz-back-btn:hover, .metaz-back-btn:focus {
+  border-color: #fff !important;
+  color: #fff !important;
+}
