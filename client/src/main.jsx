@@ -8,6 +8,7 @@ import "./ticketDetail.css";
 import TicketDetailTabView from "./TicketDetailTabView.jsx";
 import ChronoBoardDashboard from "./ChronoBoardDashboard.jsx";
 import WorklogView from "./WorklogView.jsx";
+import SlvReports from "./SlvReports.jsx"
 
 
 // Main dashboard route is now ChronoBoardDashboard (with updated filter logic)
@@ -57,6 +58,7 @@ createRoot(document.getElementById("root")).render(
         <Route path="/" element={<ChronoBoardDashboard />} />
         <Route path="/tickets/:key/full" element={React.createElement(require("./TicketDetailsFull.jsx").default)} />
         <Route path="/worklog" element={<WorklogView />} />
+        <Route path="/slv" element={<SlvReports />} />
       </Routes>
     </BrowserRouter>
   </ConfigProvider>

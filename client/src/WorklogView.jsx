@@ -367,6 +367,9 @@
 //   );
 // }
 
+
+//CREATE USER 'username'@'host' IDENTIFIED BY 'password'
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { Layout, Card, DatePicker, Button, Table, message, Typography, Space, Spin, Tag, Tooltip } from "antd";

@@ -5,6 +5,7 @@ const axios = require("axios");
 const ExcelJS = require("exceljs");
 const chronoboard = require('./chronoboard');
 const worklogRouter = require('./worklog');
+const slvRouter = require('./slv')
 
 dotenv.config();
 
@@ -23,6 +24,9 @@ app.use('/api/chronoboard', chronoboard);
  * Routes under: /api/worklog/...
  */
 app.use('/api/worklog', worklogRouter);
+
+app.use("/api/slv", slvRouter);
+
 
 
 const {

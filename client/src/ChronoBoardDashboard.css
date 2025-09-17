@@ -130,6 +130,7 @@
   font-size: 16px;
 }
 
+
 /* Responsive helpers */
 @media (max-width: 992px) {
   .cb-sidebar { width: 240px; }
@@ -138,3 +139,5 @@
   .cb-main { padding: 18px; }
   .cb-sidebar { width: 220px; }
 }
+
+

@@ -172,3 +172,18 @@ export async function fetchTicketDetails(key) {
   console.log('[chronoboardApi] fetchTicketDetails response keys:', Object.keys(json || {}));
   return json;
 }
+
+
+// chronoboardApi.js (add)
+export async function fetchSlvSummary(payload) {
+  const r = await fetch("/api/slv/summary", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload || {}),
+  });
+  if (!r.ok) {
+    const text = await r.text().catch(() => "");
+    throw new Error(text || "Failed to fetch SLV summary");
+  }
+  return r.json();
+}

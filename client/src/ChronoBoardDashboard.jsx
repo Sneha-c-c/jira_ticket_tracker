@@ -2169,6 +2169,7 @@ export default function ChronoBoardDashboard() {
         <nav className="cb-nav">
           <div className="cb-nav-section">Dashboard</div>
           <a href="/worklog" className="cb-nav-link">Worklog</a>
+          <a href="/slv" className="cb-nav-link">SLV report</a>
         </nav>
       </aside>
 
