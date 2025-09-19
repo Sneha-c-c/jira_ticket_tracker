@@ -187,3 +187,18 @@ export async function fetchSlvSummary(payload) {
   }
   return r.json();
 }
+
+
+
+// chronoboardApi.js
+export async function fetchSlvTickets(payload) {
+  // payload: { startDate, endDate, users?, clients?, status }  // status: "Open" | "UAT" | "Closed"
+  const res = await fetch("/api/slv/issues", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`Issues fetch failed: ${res.status}`);
+  return res.json(); // expected: { issues: [{ key, summary, status, assignee, updated, client }] }
+}
+

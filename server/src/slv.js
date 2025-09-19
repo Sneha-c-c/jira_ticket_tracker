@@ -104,31 +104,29 @@ async function searchPage({ jql, fields, startAt, maxResults }) {
 
 // First try /rest/api/3/search/jql using the same body shape you use elsewhere,
 // then fall back to /rest/api/3/search with pagination when needed.
-async function searchIssuesAll({ jql, fields = ["summary", "status", "project"], pageSize = 100 }) {
-  // 1) Preferred: /search/jql
+async function searchIssuesAll({
+  jql,
+  fields = ["summary", "status", "project"],
+  pageSize = 100,
+}) {
+  // 1) Preferred: /search/jql (single-query form)
   try {
     const { data } = await jiraV3.post("/search/jql", {
       jql,
-      maxResults: Math.max(pageSize, 100), // get a decent chunk in one go
-      fields, // array is fine
+      maxResults: pageSize,   // <- use pageSize directly
+      fields,
     });
 
-    // Normalise (some tenants return { issues, total }, some { results: [{ issues, total }] })
     let issues = [];
-    let total = 0;
-
     if (Array.isArray(data?.issues)) {
       issues = data.issues;
-      total = typeof data.total === "number" ? data.total : issues.length;
     } else if (Array.isArray(data?.results)) {
-      const r0 = data.results[0] || {};
-      issues = r0.issues || [];
-      total = typeof r0.total === "number" ? r0.total : issues.length;
+      issues = (data.results[0]?.issues) || [];
     }
     return issues;
   } catch (e) {
-    // only log for visibility; we’ll fall back
-    console.warn("[SLV] /search/jql failed, falling back to /search:", e?.response?.status, e?.response?.data || e.message);
+    console.warn("[SLV] /search/jql failed, falling back to /search:",
+      e?.response?.status, e?.response?.data || e.message);
   }
 
   // 2) Fallback: paginate /search
@@ -139,7 +137,7 @@ async function searchIssuesAll({ jql, fields = ["summary", "status", "project"],
       jql,
       fields,
       startAt,
-      maxResults: pageSize,
+      maxResults: pageSize,   // <- use pageSize here too
     });
     const batch = data?.issues || [];
     out.push(...batch);
@@ -149,6 +147,7 @@ async function searchIssuesAll({ jql, fields = ["summary", "status", "project"],
   }
   return out;
 }
+
 
 
 // ---------- route ----------
@@ -227,5 +226,96 @@ router.post("/summary", async (req, res) => {
     res.status(e.response?.status || 500).send(e?.message || "SLV summary failed");
   }
 });
+
+
+// GET/POST: /api/slv/issues  (we’ll use POST from the UI)
+router.post("/issues", async (req, res) => {
+  try {
+    const { startDate, endDate, users, clients, status } = req.body || {};
+    // status is one of: "Open" | "UAT" | "Closed"
+
+    if (!status) return res.status(400).json({ error: "Missing status" });
+
+    // default dates = last full calendar month
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const monthEnd   = new Date(now.getFullYear(), now.getMonth(), 0);
+    const from = startDate || monthStart.toISOString().slice(0, 10);
+    const to   = endDate   || monthEnd.toISOString().slice(0, 10);
+
+    // users: selected or the whole jira-metaz group
+    const userKeys = Array.isArray(users) && users.length
+      ? users
+      : await getGroupUserKeys("jira-metaz");
+
+    if (!userKeys.length) return res.json({ issues: [] });
+
+    // clients can be single code or array of codes (project keys)
+    const clientKeys = Array.isArray(clients) ? clients.filter(Boolean) : (clients ? [clients] : []);
+
+    // map desired status bucket to JQL condition
+    // - UAT  -> status ~ "uat"
+    // - Closed -> statusCategory = Done OR status in ("Closed","Resolved","Done")
+    // - Open -> not UAT and not Closed (i.e., everything else)
+    const jqlStatus = (() => {
+      if (String(status).toLowerCase() === "uat") {
+        return `status ~ "uat"`;
+      }
+      if (String(status).toLowerCase() === "closed") {
+        return `(statusCategory = Done OR status in ("Closed","Resolved","Done"))`;
+      }
+      // Open = NOT (UAT or Closed)
+      return `NOT (status ~ "uat" OR statusCategory = Done OR status in ("Closed","Resolved","Done"))`;
+    })();
+
+    const fields = ["summary", "status", "assignee", "updated", "project"];
+
+    // Build JQL in chunks of authors to avoid huge IN lists
+    const out = [];
+    for (const subset of chunk(userKeys, 20)) {
+      const parts = [
+        `worklogDate >= ${q(from)} AND worklogDate <= ${q(to)}`,
+        `worklogAuthor in (${subset.map(q).join(",")})`,
+        jqlStatus,
+      ];
+      if (clientKeys.length === 1) {
+        parts.push(`project = ${q(clientKeys[0])}`);
+      } else if (clientKeys.length > 1) {
+        parts.push(`project in (${clientKeys.map(q).join(", ")})`);
+      }
+      const jql = parts.join(" AND ");
+
+     const issues = await searchIssuesAll({
+  jql,
+  fields,
+  pageSize: 100,                 
+});
+      for (const it of issues) {
+        out.push({
+          key: it.key,
+          summary: it.fields?.summary || "",
+          status: it.fields?.status?.name || "",
+          assignee: it.fields?.assignee?.displayName || it.fields?.assignee?.name || "",
+          updated: it.fields?.updated || null,
+          client: it.fields?.project?.key || "",
+        });
+      }
+    }
+
+    // Deduplicate by key (same pattern as summary)
+    const seen = new Set();
+    const unique = out.filter((r) => {
+      if (seen.has(r.key)) return false;
+      seen.add(r.key);
+      return true;
+    });
+
+    res.json({ issues: unique });
+  } catch (e) {
+    console.error("[SLV] issues failed:", e?.response?.data || e.message);
+    res.status(e.response?.status || 500).send(e?.message || "Issues fetch failed");
+  }
+});
+
 
 module.exports = router;
