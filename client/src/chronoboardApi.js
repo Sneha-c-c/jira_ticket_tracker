@@ -174,31 +174,51 @@ export async function fetchTicketDetails(key) {
 }
 
 
-// chronoboardApi.js (add)
+/**
+ * PUBLIC_INTERFACE
+ * Fetch SLV summary. This is a stub that returns mock data for demo.
+ * In production, call your backend at /api/slv/summary with the payload.
+ */
 export async function fetchSlvSummary(payload) {
-  const r = await fetch("/api/slv/summary", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload || {}),
-  });
-  if (!r.ok) {
-    const text = await r.text().catch(() => "");
-    throw new Error(text || "Failed to fetch SLV summary");
-  }
-  return r.json();
+  // Mocked grouped-by-client response with status buckets
+  // payload: { startDate, endDate, users?: [keys], clients?: [keys] }
+  await new Promise(r => setTimeout(r, 300)); // simulate latency
+  const clients = [
+    { client: "SLV", open: 6, uat: 3, closed: 12 },
+    { client: "TBT", open: 2, uat: 5, closed: 4 },
+    { client: "JIRA", open: 4, uat: 2, closed: 8 },
+  ];
+  // overall buckets if no client grouping
+  const buckets = [
+    { name: "Open", count: clients.reduce((a, c) => a + (Number(c.open) || 0), 0) },
+    { name: "UAT", count: clients.reduce((a, c) => a + (Number(c.uat) || 0), 0) },
+    { name: "Closed", count: clients.reduce((a, c) => a + (Number(c.closed) || 0), 0) },
+  ];
+  return { clients, buckets, _mock: true, _payload: payload };
 }
 
 
 
-// chronoboardApi.js
+/**
+ * PUBLIC_INTERFACE
+ * Fetch SLV tickets list filtered by status. Stubbed with mock data.
+ * payload: { startDate, endDate, users?, clients?, status: "Open" | "UAT" | "Closed" }
+ */
 export async function fetchSlvTickets(payload) {
-  // payload: { startDate, endDate, users?, clients?, status }  // status: "Open" | "UAT" | "Closed"
-  const res = await fetch("/api/slv/issues", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error(`Issues fetch failed: ${res.status}`);
-  return res.json(); // expected: { issues: [{ key, summary, status, assignee, updated, client }] }
+  await new Promise(r => setTimeout(r, 250));
+  const { status = "Open", clients } = payload || {};
+  const sample = [
+    { key: "SLV-101", summary: "Implement login", status: "Open", assignee: "alice", updated: Date.now() - 3600e3, client: "SLV" },
+    { key: "SLV-102", summary: "Fix navbar bug", status: "Closed", assignee: "bob", updated: Date.now() - 7200e3, client: "SLV" },
+    { key: "TBT-21", summary: "UAT for payment", status: "UAT", assignee: "carol", updated: Date.now() - 1800e3, client: "TBT" },
+    { key: "JIRA-9", summary: "Refactor API", status: "Open", assignee: "dan", updated: Date.now() - 5400e3, client: "JIRA" },
+    { key: "TBT-23", summary: "Hotfix prod issue", status: "Closed", assignee: "eve", updated: Date.now() - 2600e3, client: "TBT" },
+    { key: "SLV-109", summary: "Write tests", status: "UAT", assignee: "alice", updated: Date.now() - 8600e3, client: "SLV" },
+  ];
+  const byStatus = sample.filter(t => t.status === status);
+  const filtered = Array.isArray(clients) && clients.length
+    ? byStatus.filter(t => clients.map(String).includes(String(t.client)))
+    : byStatus;
+  return { issues: filtered };
 }
 

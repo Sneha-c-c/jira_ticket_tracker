@@ -1,12 +1,11 @@
-// SlvReports.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import {
-  Card, DatePicker, Select, Row, Col, Button, Space, Spin, Alert, message,List, Typography
+  Card, DatePicker, Select, Row, Col, Button, Space, Spin, Alert, message, List, Typography
 } from "antd";
 import {
-  BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,Cell
+  BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell
 } from "recharts";
 import {
   fetchProjects,
@@ -23,8 +22,8 @@ import "./slv.css";
 const GROUP_KEY = "jira-metaz";
 
 const COLORS = {
-  Open:   "#69c0ff", // light blue
-  UAT:    "#95de64", // soft green
+  Open:   "#69c0ff",
+  UAT:    "#95de64",
   Closed: "#ffa39e",
 };
 
@@ -39,24 +38,30 @@ function getLastMonth() {
   };
 }
 
+/**
+ * PUBLIC_INTERFACE
+ * SLV Reports tab: shows a bar chart grouped by status and a ticket list on bar click.
+ */
 export default function SlvReports() {
   const navigate = useNavigate();
 
   // filters
   const [{ startDate, endDate }, setDates] = useState(getLastMonth());
-  const [clientOptions, setClientOptions] = useState([]);   // [{value,label}]
+  const [clientOptions, setClientOptions] = useState([]);   // [{value,label, fullName}]
   const [selectedClients, setSelectedClients] = useState([]); // MULTI
   const [userOptions, setUserOptions] = useState([]);       // [{value,label}]
   const [selectedUsers, setSelectedUsers] = useState([]);   // MULTI
   const [selectedStatus, setSelectedStatus] = useState(null); // "Open" | "UAT" | "Closed" | null
-  const [tickets, setTickets] = useState([]);
-  const [ticketsLoading, setTicketsLoading] = useState(false);
-  const [ticketsErr, setTicketsErr] = useState("");
 
   // data
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+
+  // right panel tickets
+  const [tickets, setTickets] = useState([]);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [ticketsErr, setTicketsErr] = useState("");
 
   // load clients
   useEffect(() => {
@@ -65,11 +70,11 @@ export default function SlvReports() {
       try {
         const projResp = await fetchProjects();
 
-        // Normalize whatever the API returns into {key, name}
+        // Normalize into options
         const incoming =
           Array.isArray(projResp?.projects) ? projResp.projects :
-            Array.isArray(projResp?.clients) ? projResp.clients :
-              Array.isArray(projResp) ? projResp : [];
+          Array.isArray(projResp?.clients) ? projResp.clients :
+          Array.isArray(projResp) ? projResp : [];
 
         const opts = incoming
           .map((p) => {
@@ -78,9 +83,9 @@ export default function SlvReports() {
             if (!key) return null;
 
             return {
-              value: key,                    // what we submit (Jira project key)
-              label: key.toUpperCase(),      // what we SHOW in the dropdown/tag: CODE
-              fullName: name,                // keep long name for searching/tooltip
+              value: key,                    // Jira project key
+              label: key.toUpperCase(),      // show CODE in dropdown
+              fullName: name,                // long name for search/tooltip
             };
           })
           .filter(Boolean);
@@ -92,7 +97,6 @@ export default function SlvReports() {
     })();
     return () => { cancelled = true; };
   }, []);
-
 
   // load jira-metaz users (with session cache)
   useEffect(() => {
@@ -113,18 +117,18 @@ export default function SlvReports() {
           sessionStorage.setItem(CACHE_KEY, JSON.stringify(opts));
         }
       } catch {
-        if (!cached && !cancelled) setErr("Failed to load users for jira-metaz.");
+        // ignore
       }
     })();
     return () => { cancelled = true; };
   }, []);
 
   const selectedClientKeys = useMemo(
-  () => (selectedClients || []).map(String),
-  [selectedClients]
-);
+    () => (selectedClients || []).map(String),
+    [selectedClients]
+  );
 
- // Fetch tickets whenever selectedStatus changes
+  // Fetch tickets whenever selectedStatus changes
   useEffect(() => {
     if (!selectedStatus) {
       setTickets([]);
@@ -152,15 +156,12 @@ export default function SlvReports() {
     })();
   }, [selectedStatus, startDate, endDate, selectedClientKeys, selectedUsers]);
 
-  const canQuery = useMemo(() => true, []);
-
-  // run query
+  // run summary query
   async function runQuery() {
     setLoading(true);
     setErr("");
     setChartData([]);
     try {
-      // Always fetch full set (no client), then filter locally.
       const payload = {
         startDate,
         endDate,
@@ -185,7 +186,6 @@ export default function SlvReports() {
             Closed: Number(c.closed) || 0,
           }));
         } else if (Array.isArray(res?.buckets) && res.buckets.length) {
-          // Fallback to overall buckets if client filter produced nothing
           data = res.buckets.map((b) => ({ name: b.name, count: Number(b.count) || 0 }));
         }
       } else if (Array.isArray(res?.buckets) && res.buckets.length) {
@@ -219,45 +219,42 @@ export default function SlvReports() {
 
   useEffect(() => { runQuery(); /* on mount */ }, []);
 
-  const showGrouped = !!(chartData[0] && ("Open" in chartData[0]));
-
   function handleBarClick(statusKey) {
-  return () => setSelectedStatus((s) => (s === statusKey ? null : statusKey));
-}
+    return () => setSelectedStatus((s) => (s === statusKey ? null : statusKey));
+  }
 
-const renderLegend = () => {
-  const items = [
-    { value: "Closed", color: COLORS.Closed },
-    { value: "Open",   color: COLORS.Open },
-    { value: "UAT",    color: COLORS.UAT },
-  ];
-  return (
-    <div className="slv-legend">
-      {items.map((it) => {
-        const active = selectedStatus === it.value;
-        return (
-          <span
-            key={it.value}
-            className={`slv-legend-item${active ? " is-active" : ""}`}
-            onClick={() =>
-              setSelectedStatus((s) => (s === it.value ? null : it.value))
-            }
-            title={`Show ${it.value} tickets`}
-            style={{
-              borderColor: it.color,
-              color: "#333",
-              background: active ? `${it.color}33` : "#fff",
-            }}
-          >
-            <span className="dot" style={{ background: it.color }} />
-            {it.value}
-          </span>
-        );
-      })}
-    </div>
-  );
-};
-
+  const renderLegend = () => {
+    const items = [
+      { value: "Closed", color: COLORS.Closed },
+      { value: "Open",   color: COLORS.Open },
+      { value: "UAT",    color: COLORS.UAT },
+    ];
+    return (
+      <div className="slv-legend">
+        {items.map((it) => {
+          const active = selectedStatus === it.value;
+          return (
+            <span
+              key={it.value}
+              className={`slv-legend-item${active ? " is-active" : ""}`}
+              onClick={() =>
+                setSelectedStatus((s) => (s === it.value ? null : it.value))
+              }
+              title={`Show ${it.value} tickets`}
+              style={{
+                borderColor: it.color,
+                color: "#333",
+                background: active ? `${it.color}33` : "#fff",
+              }}
+            >
+              <span className="dot" style={{ background: it.color }} />
+              {it.value}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div className="slv-wrap" style={{ minHeight: "100vh", background: "var(--bg-canvas)" }}>
@@ -372,128 +369,135 @@ const renderLegend = () => {
           </div>
         </Card>
 
-{/* RESULTS: Chart (left) + Tickets (right) */}
-<Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-  {/* LEFT: Chart */}
-  <Col xs={24} lg={14}>
-    <Card className="cb-card slv-card" bodyStyle={{ padding: 0 }}>
-      <div className="cb-card-inner">
-        <div className="cb-results-title">
-          {selectedClients.length ? `Clients: ${selectedClients.join(", ")}` : "Overall"}
-        </div>
-
-        <div className="slv-chart">
-          <Spin spinning={loading}>
-            {chartData.length ? (
-              <ResponsiveContainer width="100%" height={420}>
-                <BarChart
-                  key={("Open" in (chartData[0] || {})) ? "grouped" : "buckets"}
-                  data={chartData}
-                  margin={{ top: 8, right: 16, left: 8, bottom: 8 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis allowDecimals={false} domain={[0, "dataMax + 5"]} />
-                  <Tooltip />
-                  {/* CLICKABLE LEGEND */}
-                  <Legend content={renderLegend} />
-
-                  {/* OVERALL (buckets) */}
-                  {"count" in (chartData[0] || {}) && (
-                    <Bar dataKey="count" name="Tickets" barSize={36}>
-                      {chartData.map((d, i) => {
-                        const color = COLORS[d.name] || "#d9d9d9";
-                        return <Cell key={i} fill={color} />;
-                      })}
-                    </Bar>
-                  )}
-
-                  {/* GROUPED (per client) */}
-                  {"Open" in (chartData[0] || {}) && (
-                    <>
-                      <Bar
-                        dataKey="Open"
-                        name="Open"
-                        barSize={28}
-                        fill={COLORS.Open}
-                        isAnimationActive={false}
-                        onClick={handleBarClick("Open")}
-                      />
-                      <Bar
-                        dataKey="UAT"
-                        name="UAT"
-                        barSize={28}
-                        fill={COLORS.UAT}
-                        isAnimationActive={false}
-                        onClick={handleBarClick("UAT")}
-                      />
-                      <Bar
-                        dataKey="Closed"
-                        name="Closed"
-                        barSize={28}
-                        fill={COLORS.Closed}
-                        isAnimationActive={false}
-                        onClick={handleBarClick("Closed")}
-                      />
-                    </>
-                  )}
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="slv-empty">No data for selected filters.</div>
-            )}
-          </Spin>
-        </div>
-      </div>
-    </Card>
-  </Col>
-
-  {/* RIGHT: Tickets list */}
-  <Col xs={24} lg={10}>
-    <Card
-      className="cb-card slv-card"
-      title={
-        <div>
-          Tickets{" "}
-          {selectedStatus ? <Text code>{selectedStatus}</Text> : <Text type="secondary">— select a bar or legend</Text>}
-        </div>
-      }
-      bodyStyle={{ paddingTop: 8 }}
-    >
-      <Spin spinning={ticketsLoading}>
-        {ticketsErr ? (
-          <Alert type="error" showIcon message={ticketsErr} />
-        ) : tickets.length === 0 ? (
-          <div className="slv-empty" style={{ background: "#fff" }}>
-            {selectedStatus ? "No tickets found." : "Click Open / UAT / Closed to view tickets."}
-          </div>
-        ) : (
-          <List
-            size="small"
-            itemLayout="vertical"
-            dataSource={tickets}
-            renderItem={(it) => (
-              <List.Item key={it.key}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                  <div>
-                    <Text strong>{it.key}</Text>{" "}
-                    <Text>{it.summary}</Text>
-                    {it.client ? <Text type="secondary"> — {it.client}</Text> : null}
-                  </div>
-                  <div style={{ textAlign: "right", minWidth: 180 }}>
-                    <Text>{it.assignee || "Unassigned"}</Text><br />
-                    <Text type="secondary">{dayjs(it.updated).format("YYYY-MM-DD HH:mm")}</Text>
-                  </div>
+        {/* RESULTS: Chart (left) + Tickets (right) */}
+        <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+          {/* LEFT: Chart */}
+          <Col xs={24} lg={14}>
+            <Card className="cb-card slv-card" bodyStyle={{ padding: 0 }}>
+              <div className="cb-card-inner">
+                <div className="cb-results-title">
+                  {selectedClients.length ? `Clients: ${selectedClients.join(", ")}` : "Overall"}
                 </div>
-              </List.Item>
-            )}
-          />
-        )}
-      </Spin>
-    </Card>
-  </Col>
-</Row>
 
+                <div className="slv-chart">
+                  <Spin spinning={loading}>
+                    {chartData.length ? (
+                      <ResponsiveContainer width="100%" height={420}>
+                        <BarChart
+                          key={("Open" in (chartData[0] || {})) ? "grouped" : "buckets"}
+                          data={chartData}
+                          margin={{ top: 8, right: 16, left: 8, bottom: 8 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis allowDecimals={false} domain={[0, "dataMax + 5"]} />
+                          <Tooltip />
+                          {/* CLICKABLE LEGEND */}
+                          <Legend content={renderLegend} />
+
+                          {/* OVERALL (buckets) */}
+                          {"count" in (chartData[0] || {}) && (
+                            <Bar dataKey="count" name="Tickets" barSize={36}>
+                              {chartData.map((d, i) => {
+                                const color = COLORS[d.name] || "#d9d9d9";
+                                return <Cell key={i} fill={color} />;
+                              })}
+                            </Bar>
+                          )}
+
+                          {/* GROUPED (per client) */}
+                          {"Open" in (chartData[0] || {}) && (
+                            <>
+                              <Bar
+                                dataKey="Open"
+                                name="Open"
+                                barSize={28}
+                                fill={COLORS.Open}
+                                isAnimationActive={false}
+                                onClick={handleBarClick("Open")}
+                              />
+                              <Bar
+                                dataKey="UAT"
+                                name="UAT"
+                                barSize={28}
+                                fill={COLORS.UAT}
+                                isAnimationActive={false}
+                                onClick={handleBarClick("UAT")}
+                              />
+                              <Bar
+                                dataKey="Closed"
+                                name="Closed"
+                                barSize={28}
+                                fill={COLORS.Closed}
+                                isAnimationActive={false}
+                                onClick={handleBarClick("Closed")}
+                              />
+                            </>
+                          )}
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="slv-empty">No data for selected filters.</div>
+                    )}
+                  </Spin>
+                </div>
+              </div>
+            </Card>
+          </Col>
+
+          {/* RIGHT: Tickets list */}
+          <Col xs={24} lg={10}>
+            <Card
+              className="cb-card slv-card"
+              title={
+                <div>
+                  Tickets{" "}
+                  {selectedStatus ? <Text code>{selectedStatus}</Text> : <Text type="secondary">— select a bar or legend</Text>}
+                </div>
+              }
+              bodyStyle={{ paddingTop: 8 }}
+            >
+              <Spin spinning={ticketsLoading}>
+                {ticketsErr ? (
+                  <Alert type="error" showIcon message={ticketsErr} />
+                ) : tickets.length === 0 ? (
+                  <div className="slv-empty" style={{ background: "#fff" }}>
+                    {selectedStatus ? "No tickets found." : "Click Open / UAT / Closed to view tickets."}
+                  </div>
+                ) : (
+                  <List
+                    size="small"
+                    itemLayout="vertical"
+                    dataSource={tickets}
+                    renderItem={(it) => (
+                      <List.Item key={it.key}>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                          <div>
+                            <a
+                              href={`https://jira.atlassian.com/browse/${encodeURIComponent(it.key)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ marginRight: 6, fontWeight: 600 }}
+                              title="Open in Jira"
+                            >
+                              {it.key}
+                            </a>
+                            <Text>{it.summary}</Text>
+                            {it.client ? <Text type="secondary"> — {it.client}</Text> : null}
+                          </div>
+                          <div style={{ textAlign: "right", minWidth: 180 }}>
+                            <Text>{it.assignee || "Unassigned"}</Text><br />
+                            <Text type="secondary">{dayjs(it.updated).format("YYYY-MM-DD HH:mm")}</Text>
+                          </div>
+                        </div>
+                      </List.Item>
+                    )}
+                  />
+                )}
+              </Spin>
+            </Card>
+          </Col>
+        </Row>
       </main>
     </div>
   );
